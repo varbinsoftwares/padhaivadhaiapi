@@ -146,21 +146,39 @@ class Api extends REST_Controller {
             return 'Message successfully delivered' . PHP_EOL;
     }
 
-
-
- 
+    function getCollectionSingle_get($token, $id) {
+        $this->db->where("id", $id);
+        $query = $this->db->get("set_collection");
+        $result = $query->row_array();
+        $this->response($result);
+    }
 
     function getCollection_get($token) {
         $query = $this->db->get("set_collection");
-        $result = $query->result_array(); 
+        $result = $query->result_array();
         $this->response($result);
     }
-    
+
     function getCollectionCard_get($token, $collection_id) {
         $this->db->where("collection_id", $collection_id);
         $query = $this->db->get("set_collection_card");
-        $result = $query->result_array(); 
+        $result = $query->result_array();
         $this->response($result);
+    }
+
+    function accessCollection_post() {
+        $responsedata = array("status"=>"100", "message"=>"Collection code is wrong.");
+        $collection_id = $this->post("collection_id");
+        $access_code = $this->post("access_code");
+        $this->db->where("id", $collection_id);
+        $this->db->where("access_code", $access_code);
+        $query = $this->db->get("set_collection");
+        $result = $query->row_array();
+        if ($result) {
+            $responsedata["status"] = "200";
+            $responsedata["message"] = "Collection code varified.";
+        }
+        $this->response($responsedata);
     }
 
 }
