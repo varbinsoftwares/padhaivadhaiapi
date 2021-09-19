@@ -287,14 +287,15 @@ class Api extends REST_Controller {
 
         $actfilname = $_FILES['file']['name'];
 
-        move_uploaded_file($_FILES["file"]['tmp_name'], 'assets/profile_image/' . $actfilname);
+        $filelocation = explode("bookbnev", APPPATH)[0]."bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
+        move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
 
 
         $this->response(array("status" => "200"));
     }
     
     function test_get(){
-        echo explode("bookbnev", APPPATH)[0]."bookbnev";
+        echo explode("bookbnev", APPPATH)[0]."bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
         
     }
 
