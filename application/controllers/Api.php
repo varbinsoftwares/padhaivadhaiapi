@@ -206,10 +206,16 @@ class Api extends REST_Controller {
         $this->db->order_by("id desc");
         $query = $this->db->get("padai_ask_query");
         $querylist = $query->result_array();
+        $querylistfinal = [];
+        foreach ($querylist as $key => $value) {
+            $value["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" . $value["upload_file"];
+            array_push($querylistfinal . $value);
+        }
+
         if ($querylist) {
-            $this->response(array("status" => "100", "query_list" => $querylist));
+            $this->response(array("status" => "100", "query_list" => $querylistfinal));
         } else {
-            $this->response(array("status" => "402", "query_list" => $querylist, "message" => "No past quesries here, Start asking..."));
+            $this->response(array("status" => "402", "query_list" => $querylistfinal, "message" => "No past quesries here, Start asking..."));
         }
     }
 
@@ -248,7 +254,7 @@ class Api extends REST_Controller {
         $message2 = $querydata;
         $message2["message_body"] = $querydata["description"];
         $message2["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" . $querydata["upload_file"];
-        $message2["image"] = "-";
+
 
         array_push($messagedata, $message2);
 
@@ -287,16 +293,15 @@ class Api extends REST_Controller {
 
         $actfilname = $_FILES['file']['name'];
 
-        $filelocation = APPPATH."../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original/";
+        $filelocation = APPPATH . "../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original/";
         move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
 
 
         $this->response(array("status" => "200"));
     }
-    
-    function test_get(){
-       echo  $filelocation = APPPATH."../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
-        
+
+    function test_get() {
+        echo $filelocation = APPPATH . "../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
     }
 
 }
