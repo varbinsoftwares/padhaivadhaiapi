@@ -230,10 +230,11 @@ class Api extends REST_Controller {
         $this->db->select("m_date, m_time, sender_id, receiver_id, message_body, '-' as image");
         $this->db->where("channel_id", $channel_id);
 //        $this->db->where("sender_id", $user_id)->or_where("receiver_id", $user_id);
-        $this->db->order_by("id desc");
+//        $this->db->order_by("id desc");
         $query = $this->db->get("channel_message_personal");
-        $messagedata = $query->result_array();
+        $messagedataall = $query->result_array();
 
+        $messagedata = [];
         $this->db->select("qry_date as m_date, qry_time as m_time, user_id as sender_id, '1' as receiver_id, topic, description, upload_file");
         $this->db->where("id", $channel_id);
         $query = $this->db->get("padai_ask_query");
@@ -248,6 +249,10 @@ class Api extends REST_Controller {
         $message2["message_body"] = $querydata["description"];
         $message2["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" .$querydata["upload_file"];
         array_push($messagedata, $message2);
+        
+        foreach ($messagedataall as $key => $value) {
+             array_push($messagedata, $value);
+        }
         
         $this->response($messagedata);
     }
