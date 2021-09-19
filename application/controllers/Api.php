@@ -246,7 +246,7 @@ class Api extends REST_Controller {
          
         $message2 = $querydata;
         $message2["message_body"] = $querydata["description"];
-        $message2["image"] = base_url("assets/profile_image/") .$querydata["upload_file"];
+        $message2["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" .$querydata["upload_file"];
         array_push($messagedata, $message2);
         
         $this->response($messagedata);
