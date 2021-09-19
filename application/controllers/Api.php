@@ -241,20 +241,42 @@ class Api extends REST_Controller {
         $querydata = $query->row_array();
 
         $message1 = $querydata;
-        $message1["message_body"] = "Topic:\n ". $querydata["topic"]. " ..";
-         $message1["image"]  = "-";
-         array_push($messagedata, $message1);
-         
+        $message1["message_body"] = "Topic:\n " . $querydata["topic"] . " ..";
+        $message1["image"] = "-";
+        array_push($messagedata, $message1);
+
         $message2 = $querydata;
         $message2["message_body"] = $querydata["description"];
-        $message2["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" .$querydata["upload_file"];
+        $message2["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" . $querydata["upload_file"];
+        $message2["image"] = "-";
+
         array_push($messagedata, $message2);
-        
+
         foreach ($messagedataall as $key => $value) {
-             array_push($messagedata, $value);
+            array_push($messagedata, $value);
         }
-        
-        $this->response($messagedata);
+        $finalchat = [];
+        foreach ($messagedata as $key => $value) {
+            $value["m_time"] = $newDate = date("H:m:s", strtotime($value["m_time"]));
+            array_push($finalchat, $value);
+        }
+
+        $this->response($finalchat);
+    }
+
+    function queryChatInsert_post() {
+        $postdata = $this->post();
+        $postdata["m_date"] = date("Y-m-d");
+        $postdata["m_time"] = date("h:i:s a");
+        $postdata["admin_seen"] = "0";
+
+        $this->db->insert("channel_message_personal", $postdata);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            $this->response(array("status" => "100", "last_id" => $insert_id, "message" => "Your query has been submitted"));
+        } else {
+            $this->response(array("status" => "402", "message" => "Unable to submit query"));
+        }
     }
 
     function fileupload_post() {
@@ -269,6 +291,10 @@ class Api extends REST_Controller {
 
 
         $this->response(array("status" => "200"));
+    }
+    
+    function test_get(){
+        echo APPPATH;
     }
 
 }
