@@ -146,39 +146,124 @@ class Api extends REST_Controller {
             return 'Message successfully delivered' . PHP_EOL;
     }
 
-    function getCollectionSingle_get($token, $id) {
-        $this->db->where("id", $id);
-        $query = $this->db->get("set_collection");
-        $result = $query->row_array();
-        $this->response($result);
-    }
-
-    function getCollection_get($token) {
-        $query = $this->db->get("set_collection");
-        $result = $query->result_array();
-        $this->response($result);
-    }
-
-    function getCollectionCard_get($token, $collection_id) {
-        $this->db->where("collection_id", $collection_id);
-        $query = $this->db->get("set_collection_card");
-        $result = $query->result_array();
-        $this->response($result);
-    }
-
-    function accessCollection_post() {
-        $responsedata = array("status"=>"100", "message"=>"Collection code is wrong.");
-        $collection_id = $this->post("collection_id");
-        $access_code = $this->post("access_code");
-        $this->db->where("id", $collection_id);
-        $this->db->where("access_code", $access_code);
-        $query = $this->db->get("set_collection");
-        $result = $query->row_array();
-        if ($result) {
-            $responsedata["status"] = "200";
-            $responsedata["message"] = "Collection code varified.";
+    function registration_post() {
+        $postdata = $this->post();
+        $email = $postdata["username"];
+        $mobile_no = $postdata["mobile_no"];
+        $this->db->where("email", $email);
+        $this->db->or_where("mobile_no", $mobile_no);
+        $query = $this->db->get('app_users');
+        $userdata = $query->row_array();
+        if ($userdata) {
+            $this->response(array("status" => "401", "message" => "Email or mobile no. already registered"));
+        } else {
+            $this->db->insert("app_users", $postdata);
+            $insert_id = $this->db->insert_id();
+            $postdata["id"] = $insert_id;
+            if ($insert_id) {
+                $this->response(array("status" => "100", "userdata" => $postdata, "message" => "Your account has been created."));
+            } else {
+                $this->response(array("status" => "402", "message" => "Unable to create account please try again"));
+            }
         }
-        $this->response($responsedata);
+    }
+
+    function login_post() {
+        $postdata = $this->post();
+        $username = $postdata["username"];
+        $password = $postdata["password"];
+        $this->db->where("password", $password);
+        $this->db->where("email", $username);
+        $this->db->or_where("mobile_no", $username);
+        $query = $this->db->get('app_users');
+        $userdata = $query->row_array();
+        if ($userdata) {
+            if ($userdata["password"] == $password) {
+                $this->response(array("status" => "100", "userdata" => $userdata, "message" => "You have logged in successfully"));
+            } else {
+                $this->response(array("status" => "401", "message" => "You have entered incorrect Password"));
+            }
+        } else {
+            $this->response(array("status" => "401", "message" => "Email or mobile no. not registered"));
+        }
+    }
+
+    function askQuery_post() {
+        $postdata = $this->post();
+        $postdata["qry_date"] = date("Y-m-d");
+        $postdata["qry_time"] = date("h:i:s a");
+        $this->db->insert("padai_ask_query", $postdata);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            $this->response(array("status" => "100", "last_id" => $insert_id, "message" => "Your query has been submitted"));
+        } else {
+            $this->response(array("status" => "402", "message" => "Unable to submit query"));
+        }
+    }
+
+    function askQueryList_get($user_id) {
+        $this->db->where("user_id", $user_id);
+        $this->db->order_by("id desc");
+        $query = $this->db->get("padai_ask_query");
+        $querylist = $query->result_array();
+        if ($querylist) {
+            $this->response(array("status" => "100", "query_list" => $querylist));
+        } else {
+            $this->response(array("status" => "402", "query_list" => $querylist, "message" => "No past quesries here, Start asking..."));
+        }
+    }
+
+    function queryChat_get($channel_id, $user_id) {
+        $sql = "select 
+                   au2.username as username2, au2.name as name2, au2.email as email2, au2.profile_image as profile_image2,
+                   au.username, au.name, au.email, au.profile_image, ch.message_body, ch.message_file, ch.m_date,
+                              ch.m_time, ch.sender_id, ch.receiver_id from channel_message_personal as ch 
+                              left join app_users as au on au.id = ch.sender_id
+                              left join app_users as au2 on au2.id = ch.receiver_id
+                              where ((ch.receiver_id = '$user_id' and ch.sender_id = '1') or (ch.receiver_id = '1' and ch.sender_id = '$user_id')) and channel_id = '$channel_id' order by ch.id";
+        $query = $this->db->query($sql);
+        $messagedata = $query->result_array();
+        $this->response($messagedata);
+    }
+
+    function queryChat2_get($channel_id, $user_id) {
+        $this->db->select("m_date, m_time, sender_id, receiver_id, message_body, '-' as image");
+        $this->db->where("channel_id", $channel_id);
+//        $this->db->where("sender_id", $user_id)->or_where("receiver_id", $user_id);
+//        $this->db->order_by("id desc");
+        $query = $this->db->get("channel_message_personal");
+        $messagedata = $query->result_array();
+
+        $this->db->select("qry_date as m_date, qry_time as m_time, user_id as sender_id, '1' as receiver_id, topic, description, upload_file");
+        $this->db->where("id", $channel_id);
+        $query = $this->db->get("padai_ask_query");
+        $querydata = $query->row_array();
+
+        $message1 = $querydata;
+        $message1["message_body"] = "Topic:\n ". $querydata["topic"]. " ..";
+         $message1["image"]  = "-";
+         array_push($messagedata, $message1);
+         
+        $message2 = $querydata;
+        $message2["message_body"] = $querydata["description"];
+        $message2["image"] = base_url("assets/profile_image/") .$querydata["upload_file"];
+        array_push($messagedata, $message2);
+        
+        $this->response($messagedata);
+    }
+
+    function fileupload_post() {
+
+        $ext1 = explode('.', $_FILES['file']['name']);
+        $ext = strtolower(end($ext1));
+        $filename = $type . rand(1000, 10000);
+
+        $actfilname = $_FILES['file']['name'];
+
+        move_uploaded_file($_FILES["file"]['tmp_name'], 'assets/profile_image/' . $actfilname);
+
+
+        $this->response(array("status" => "200"));
     }
 
 }

@@ -28,11 +28,11 @@ define('EMAILCC', "");
 
 
 //reporting
-define('PDF_HEADER', $globleConnectReport['pdf_report_header']);
-define('EMAIL_HEADER', $globleConnectReport['email_header']);
-define('EMAIL_FOOTER', $globleConnectReport['email_footer']);
-define('MESSAGE_HEADER', $globleConnectReport['message_header']);
-define('REPORT_MODE', $globleConnectReport['report_mode']);
+define('PDF_HEADER', "");
+define('EMAIL_HEADER',  "");
+define('EMAIL_FOOTER',  "");
+define('MESSAGE_HEADER', "");
+define('REPORT_MODE',  "");
 
 
 define('SEO_TITLE', $configuration['seo_title']);

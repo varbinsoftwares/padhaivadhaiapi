@@ -1,7 +1,7 @@
 <?php
-$activedb = "apuser_wol";
-$activeusername = "apuser_wol";
-$activepassword = "1MbIie6cVVAW";
+$activedb = "bookbnev_padaiv";
+$activeusername = "bookbnev_padaiv";
+$activepassword = "G7}=DZyZH5@Z";
 
 //
 ////$activedb = "j2k5e6r5_araskocon";
