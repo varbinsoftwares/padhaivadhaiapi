@@ -209,7 +209,7 @@ class Api extends REST_Controller {
         $querylistfinal = [];
         foreach ($querylist as $key => $value) {
             $value["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" . $value["upload_file"];
-            array_push($querylistfinal . $value);
+            array_push($querylistfinal, $value);
         }
 
         if ($querylist) {
