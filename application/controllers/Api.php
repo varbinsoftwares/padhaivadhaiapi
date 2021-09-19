@@ -294,7 +294,8 @@ class Api extends REST_Controller {
     }
     
     function test_get(){
-        echo APPPATH;
+        echo explode("bookbnev", APPPATH)[0]."bookbnev";
+        
     }
 
 }
