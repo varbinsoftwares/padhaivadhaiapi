@@ -230,7 +230,7 @@ class Api extends REST_Controller {
         $this->db->select("m_date, m_time, sender_id, receiver_id, message_body, '-' as image");
         $this->db->where("channel_id", $channel_id);
 //        $this->db->where("sender_id", $user_id)->or_where("receiver_id", $user_id);
-//        $this->db->order_by("id desc");
+        $this->db->order_by("id desc");
         $query = $this->db->get("channel_message_personal");
         $messagedata = $query->result_array();
 
