@@ -304,14 +304,27 @@ class Api extends REST_Controller {
     function test_get() {
         echo $filelocation = APPPATH . "../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
     }
-    
-    function setFCMToken_post(){
-         $postdata = $this->post();
+
+    function setFCMToken_post() {
+        $postdata = $this->post();
         $insertArray = array(
-            "user_id"=>$postdata["user_id"],
-            "token_id"=>$postdata["token_id"],
+            "model" => "",
+            "manufacturer" => "",
+            "uuid" => "",
+            "datetime" => date("Y-m-d H:m:s a"),
+            "user_id" => $postdata["user_id"],
+            "reg_id" => $postdata["token_id"],
         );
-        $this->response(array("status" => "200"));
+        $this->db->where("user_id", $postdata["user_id"]);
+        $query = $this->db->get("gcm_registration");
+        $querydata = $query->result_array();
+        if ($querydata) {
+            $this->response(array("status" => "200", "last_id" => $querydata[0]["id"]));
+        } else {
+            $this->db->insert("gcm_registration", $insertArray);
+            $insert_id = $this->db->insert_id();
+        }
+        $this->response(array("status" => "200", "last_id" => $insert_id));
     }
 
 }
