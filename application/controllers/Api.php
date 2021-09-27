@@ -304,6 +304,15 @@ class Api extends REST_Controller {
     function test_get() {
         echo $filelocation = APPPATH . "../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
     }
+    
+    function setFCMToken(){
+         $postdata = $this->post();
+        $insertArray = array(
+            "user_id"=>$postdata["user_id"],
+            "token_id"=>$postdata["token_id"],
+        );
+        $this->response(array("status" => "200"));
+    }
 
 }
 
