@@ -319,6 +319,7 @@ class Api extends REST_Controller {
         $query = $this->db->get("gcm_registration");
         $querydata = $query->result_array();
         if ($querydata) {
+            $this->db->set($insertArray)->where("user_id", $postdata["token_id"])->update("gcm_registration");
             $this->response(array("status" => "200", "last_id" => $querydata[0]["id"]));
         } else {
             $this->db->insert("gcm_registration", $insertArray);
