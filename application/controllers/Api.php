@@ -305,7 +305,7 @@ class Api extends REST_Controller {
         echo $filelocation = APPPATH . "../../../bookbnev/public_html/app.padhaivadhai.com/padhaiVadhaiApp/original";
     }
     
-    function setFCMToken(){
+    function setFCMToken_post(){
          $postdata = $this->post();
         $insertArray = array(
             "user_id"=>$postdata["user_id"],
