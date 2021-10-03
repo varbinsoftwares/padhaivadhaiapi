@@ -8,7 +8,7 @@ class Api extends REST_Controller {
     public function __construct() {
         parent::__construct();
 
-
+        $this->API_ACCESS_KEY = "AAAALMx665o:APA91bGHg4uYe_uPcaIecTzutOUXbE3P4GF5xBtLOWuAfYi6MpUUeB-WL4YKXVn-ziQJrpot8q0uGS7KARKqrw1Ts9CBJeIunvhP0iuebR7oTMHdI3BW_nNWyysDSgADDibqCsIXdAT-";
         $this->load->library('session');
         $this->checklogin = $this->session->userdata('logged_in');
         $this->user_id = $this->session->userdata('logged_in')['login_id'];
@@ -50,33 +50,16 @@ class Api extends REST_Controller {
     public function android($data, $reg_id_array) {
         $url = 'https://fcm.googleapis.com/fcm/send';
 
-        $insertArray = array(
-            'title' => $data['title'],
-            'message' => $data['message'],
-            "datetime" => date("Y-m-d H:i:s a")
-        );
-        $this->db->insert("notification", $insertArray);
 
-        $message = array(
-            'title' => $data['title'],
-            'message' => $data['message'],
-            'subtitle' => '',
-            'tickerText' => '',
-            'msgcnt' => 1,
-            'vibrate' => 1
-        );
 
         $headers = array(
             'Authorization: key=' . $this->API_ACCESS_KEY,
             'Content-Type: application/json'
         );
 
-        $fields = array(
-            'registration_ids' => $reg_id_array,
-            'data' => $message,
-        );
 
-        return $this->useCurl($url, $headers, json_encode($fields));
+
+        return $this->useCurl($url, $headers, json_encode($data));
     }
 
     public function androidAdmin($data, $reg_id_array) {
@@ -201,6 +184,36 @@ class Api extends REST_Controller {
         }
     }
 
+    function getUnseenMessage($channel_id = 0, $user_id = 0) {
+        $this->db->select("count(id) as unseen");
+        if ($channel_id) {
+            $this->db->where("channel_id", $channel_id);
+        }
+        if ($user_id) {
+            $this->db->where("receiver_id", $user_id);
+        }
+        $this->db->where("user_seen!=", "1");
+        $query = $this->db->get("channel_message_personal");
+        $messagedataall = $query->row_array();
+        if ($messagedataall) {
+            return $messagedataall["unseen"];
+        } else {
+            return 0;
+        }
+    }
+
+    function getAllNotification_get($user_id = 0) {
+        $this->db->select("message_body, cmp.channel_id, user_seen, paq.topic");
+        $this->db->from('channel_message_personal cmp');
+        $this->db->join('padai_ask_query paq', 'paq.id=cmp.channel_id', 'left');
+        $this->db->where("user_seen!=", "1");
+        $this->db->where("user_id", $user_id);
+        $this->db->order_by("cmp.id desc");
+        $query = $this->db->get();
+        $messagedataall = $query->result_array();
+        $this->response(array("notification_list" => $messagedataall, "notification_count" => "". count($messagedataall)));
+    }
+
     function askQueryList_get($user_id) {
         $this->db->where("user_id", $user_id);
         $this->db->order_by("id desc");
@@ -208,7 +221,8 @@ class Api extends REST_Controller {
         $querylist = $query->result_array();
         $querylistfinal = [];
         foreach ($querylist as $key => $value) {
-            $value["unseen"] = "0";
+            $channel_id = $value["id"];
+            $value["unseen"] = "" . $this->getUnseenMessage($channel_id);
             $value["image"] = "https://app.padhaivadhai.com/padhaiVadhaiApp/original/" . $value["upload_file"];
             array_push($querylistfinal, $value);
         }
@@ -236,8 +250,6 @@ class Api extends REST_Controller {
     function queryChat2_get($channel_id, $user_id) {
         $this->db->select("m_date, m_time, sender_id, receiver_id, message_body, '-' as image");
         $this->db->where("channel_id", $channel_id);
-//        $this->db->where("sender_id", $user_id)->or_where("receiver_id", $user_id);
-//        $this->db->order_by("id desc");
         $query = $this->db->get("channel_message_personal");
         $messagedataall = $query->result_array();
 
@@ -267,6 +279,12 @@ class Api extends REST_Controller {
             $value["m_time"] = $newDate = date("H:m:s", strtotime($value["m_time"]));
             array_push($finalchat, $value);
         }
+
+        $this->db->set(array("user_seen" => "1"));
+        $this->db->where("channel_id", $channel_id);
+        $query = $this->db->update("channel_message_personal");
+
+
 
         $this->response($finalchat);
     }
@@ -326,6 +344,19 @@ class Api extends REST_Controller {
             $insert_id = $this->db->insert_id();
         }
         $this->response(array("status" => "200", "last_id" => $insert_id));
+    }
+
+    function testNotification_get() {
+        $tokenid = "eKfx0CHNTIqp0rgg8O-ykn:APA91bHdIew-e_pUidpVOZoCgW6Hn5bEidirQ6v20zJxbED2Td3-meKy015iA1BdTBV8cNqNs7jjFlJg1Qu8uR6lm2xcwT-ltiACBVg9XZ3de14rSaVVthzHdONDW8jl8ylmdvHvNrlJ";
+        $data = [
+            "to" => $tokenid,
+            "notification" => [
+                "body" => "This is message body 32322323 ",
+                "title" => "32322323 this is message title",
+                "icon" => "ic_launcher"
+            ],
+        ];
+        echo $this->android($data, [$tokenid]);
     }
 
 }
