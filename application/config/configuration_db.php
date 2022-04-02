@@ -1,6 +1,6 @@
 <?php
-$activedb = "bookbnev_padaiv";
-$activeusername = "bookbnev_padaiv";
+$activedb = "u282820314_padaiv";
+$activeusername = "u282820314_padaiv";
 $activepassword = "G7}=DZyZH5@Z";
 
 //

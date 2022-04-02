@@ -347,14 +347,16 @@ class Api extends REST_Controller {
     }
 
     function testNotification_get() {
-        $tokenid = "eKfx0CHNTIqp0rgg8O-ykn:APA91bHdIew-e_pUidpVOZoCgW6Hn5bEidirQ6v20zJxbED2Td3-meKy015iA1BdTBV8cNqNs7jjFlJg1Qu8uR6lm2xcwT-ltiACBVg9XZ3de14rSaVVthzHdONDW8jl8ylmdvHvNrlJ";
+        $tokenid = "cLwHo82yQ0uil4iMyRxfF9:APA91bFMX7GP-A0NrrgWJxUbFiDo-8IxcQt-NLIpL0mUmtBzZCKXoLIww5aIP05szTgx7V-XnZT5hpRogHEyA8tUcT1xdwo3ZjFqEoqHN1GUCMjcB629MK3zEXqmoOmj6ei-lfB-qPgJ";
         $data = [
             "to" => $tokenid,
             "notification" => [
                 "body" => "This is message body 32322323 ",
                 "title" => "32322323 this is message title",
+                "page"=>"chat",
                 "icon" => "ic_launcher"
             ],
+            "data"=>array("channel_id"=>"1215")
         ];
         echo $this->android($data, [$tokenid]);
     }
