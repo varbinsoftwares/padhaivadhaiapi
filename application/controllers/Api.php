@@ -312,7 +312,7 @@ class Api extends REST_Controller {
 
         $actfilname = $_FILES['file']['name'];
 
-        $filelocation = APPPATH . "../../app_padhaivadhai_com/padhaiVadhaiApp/original/";
+        $filelocation = "/home/u282820314/domains/padhaivadhai.com/public_html/app_padhaivadhai_com/padhaiVadhaiApp/original/";
         move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
 
 
